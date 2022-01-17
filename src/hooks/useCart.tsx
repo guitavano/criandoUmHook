@@ -23,20 +23,40 @@ const CartContext = createContext<CartContextData>({} as CartContextData);
 
 export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const [cart, setCart] = useState<Product[]>(() => {
-    // const storagedCart = Buscar dados do localStorage
+    const storagedCart = localStorage.getItem("@RocketShoes:cart")
 
-    // if (storagedCart) {
-    //   return JSON.parse(storagedCart);
-    // }
+    if (storagedCart) {
+      return JSON.parse(storagedCart);
+    }
 
     return [];
   });
 
   const addProduct = async (productId: number) => {
     try {
-      // TODO
+      api.get('/products')
+        .then(response => {
+          response.data.forEach((product: Product) => {
+            if (product.id === productId) {
+
+              let cart = localStorage.getItem("@RocketShoes:cart")
+
+              let productsCart = []
+
+              if (cart) {
+
+              } else {
+                productsCart.push(product)
+              }
+              console.log(productsCart)
+              localStorage.setItem("@RocketShoes:cart", JSON.stringify(productsCart))
+
+            }
+          })
+        })
+
     } catch {
-      // TODO
+      toast.error('Erro na adição do produto');
     }
   };
 
