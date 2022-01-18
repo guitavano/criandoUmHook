@@ -47,11 +47,6 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
                 ...product,
                 amount: 1
               }
-              console.log(product)
-              console.log(cart)
-              if(cart[0] == product){
-                console.log("ja tem")
-              }
 
               setCart([...cart, product])              
             }
