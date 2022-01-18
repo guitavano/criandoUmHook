@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useState } from 'react';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../services/api';
 import { Product, Stock } from '../types';
@@ -32,28 +32,32 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     return [];
   });
 
+  useEffect(() => {
+    localStorage.setItem("@RocketShoes:cart", JSON.stringify(cart))
+    console.log(cart)
+  }, [cart]);
+
   const addProduct = async (productId: number) => {
     try {
       api.get('/products')
         .then(response => {
           response.data.forEach((product: Product) => {
             if (product.id === productId) {
-
-              let cart = localStorage.getItem("@RocketShoes:cart")
-
-              let productsCart = []
-
-              if (cart) {
-
-              } else {
-                productsCart.push(product)
+              product = {
+                ...product,
+                amount: 1
               }
-              console.log(productsCart)
-              localStorage.setItem("@RocketShoes:cart", JSON.stringify(productsCart))
+              console.log(product)
+              console.log(cart)
+              if(cart[0] == product){
+                console.log("ja tem")
+              }
 
+              setCart([...cart, product])              
             }
           })
         })
+
 
     } catch {
       toast.error('Erro na adição do produto');
