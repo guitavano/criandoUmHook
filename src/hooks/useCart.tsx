@@ -34,7 +34,6 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   useEffect(() => {
     localStorage.setItem("@RocketShoes:cart", JSON.stringify(cart))
-    console.log(cart)
   }, [cart]);
 
   const addProduct = async (productId: number) => {
@@ -43,16 +42,26 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         .then(response => {
           response.data.forEach((product: Product) => {
             if (product.id === productId) {
-              product = {
-                ...product,
-                amount: 1
+              let isProductInTheCart = false
+              cart.map(productInTheCart => {
+                if (productInTheCart.id === productId) {
+                  productInTheCart.amount += 1
+                  isProductInTheCart = true
+                  setCart([...cart])
+                }
+              })
+
+              if (!isProductInTheCart) {
+                product = {
+                  ...product,
+                  amount: 1
+                }
+                setCart([...cart, product])
               }
 
-              setCart([...cart, product])              
             }
           })
         })
-
 
     } catch {
       toast.error('Erro na adição do produto');
@@ -61,9 +70,14 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   const removeProduct = (productId: number) => {
     try {
-      // TODO
+      cart.map(productInTheCart => {
+        if (productInTheCart.id === productId) {
+          cart.splice(cart.indexOf(productInTheCart))
+          setCart([...cart])
+        }
+      })
     } catch {
-      // TODO
+      toast.error('Erro na remoção do produto');
     }
   };
 
@@ -72,7 +86,12 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     amount,
   }: UpdateProductAmount) => {
     try {
-      // TODO
+      cart.map(productInTheCart => {
+        if (productInTheCart.id === productId) {
+          productInTheCart.amount = amount
+          setCart([...cart])
+        }
+      })
     } catch {
       // TODO
     }
