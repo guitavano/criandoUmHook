@@ -48,6 +48,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
                   productInTheCart.amount += 1
                   isProductInTheCart = true
                   setCart([...cart])
+                  updateProductAmount({productId: productId, amount: 1})
                 }
               })
 
