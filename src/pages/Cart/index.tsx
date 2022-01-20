@@ -20,18 +20,18 @@ interface Product {
 const Cart = (): JSX.Element => {
   const { cart, removeProduct, updateProductAmount } = useCart();
 
-  // const cartFormatted = cart.map(product => ({
-  //   // TODO
-  // }))
+  const cartFormatted = cart.map(product => ({
+    ...product,
+    priceFormatted: formatPrice(product.price),
+    subTotal: formatPrice(product.price * product.amount)
+  }))
 
-  const total =
-    formatPrice(
-      cart.reduce((sumTotal, product) => {
-        sumTotal += product.price
+  const total = cart.reduce((sumTotal, product) => {
+    sumTotal += product.price * product.amount
 
-        return sumTotal
-      }, 0)
-    )
+    return sumTotal
+  }, 0)
+
 
   function handleProductIncrement(product: Product) {
     updateProductAmount({ productId: product.id, amount: product.amount + 1 })
@@ -59,7 +59,7 @@ const Cart = (): JSX.Element => {
         </thead>
         <tbody>
           {
-            cart.map((product) => {
+            cartFormatted.map((product) => {
               return (
                 <tr data-testid="product" key={product.id}>
                   <td>
@@ -67,7 +67,7 @@ const Cart = (): JSX.Element => {
                   </td>
                   <td>
                     <strong>{product.title}</strong>
-                    <span>{formatPrice(product.price)}</span>
+                    <span>{product.priceFormatted}</span>
                   </td>
                   <td>
                     <div>
@@ -95,7 +95,7 @@ const Cart = (): JSX.Element => {
                     </div>
                   </td>
                   <td>
-                    <strong>{formatPrice(product.price * product.amount)}</strong>
+                    <strong>{product.subTotal}</strong>
                   </td>
                   <td>
                     <button
@@ -118,7 +118,7 @@ const Cart = (): JSX.Element => {
 
         <Total>
           <span>TOTAL</span>
-          <strong>{total || 0}</strong>
+          <strong>{formatPrice(total) || 0}</strong>
         </Total>
       </footer>
     </Container>

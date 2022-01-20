@@ -45,10 +45,8 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
               let isProductInTheCart = false
               cart.map(productInTheCart => {
                 if (productInTheCart.id === productId) {
-                  productInTheCart.amount += 1
                   isProductInTheCart = true
-                  setCart([...cart])
-                  updateProductAmount({productId: productId, amount: 1})
+                  updateProductAmount({ productId: productId, amount: productInTheCart.amount + 1 })
                 }
               })
 
@@ -73,7 +71,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     try {
       cart.map(productInTheCart => {
         if (productInTheCart.id === productId) {
-          cart.splice(cart.indexOf(productInTheCart))
+          cart.splice(cart.indexOf(productInTheCart), 1)
           setCart([...cart])
         }
       })
