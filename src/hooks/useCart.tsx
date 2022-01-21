@@ -32,35 +32,42 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     return [];
   });
 
+  const [products, setProducts] = useState<Product[]>([])
+
+  useEffect(() => {
+    let productsToAdd: Product[] = []
+    api.get('/products').then(response => {
+      response.data.forEach((product: Product) => {
+        productsToAdd.push(product)
+      })
+      setProducts(productsToAdd)
+    })
+  }, []);
+
   useEffect(() => {
     localStorage.setItem("@RocketShoes:cart", JSON.stringify(cart))
   }, [cart]);
 
   const addProduct = async (productId: number) => {
     try {
-      api.get('/products')
-        .then(response => {
-          response.data.forEach((product: Product) => {
-            if (product.id === productId) {
-              let isProductInTheCart = false
-              cart.map(productInTheCart => {
-                if (productInTheCart.id === productId) {
-                  isProductInTheCart = true
-                  updateProductAmount({ productId: productId, amount: productInTheCart.amount + 1 })
-                }
-              })
+      let product: Product | undefined = products.find(product => product['id'] === productId)
 
-              if (!isProductInTheCart) {
-                product = {
-                  ...product,
-                  amount: 1
-                }
-                setCart([...cart, product])
-              }
+      if (product) {
+        let isProductInTheCart: Product | undefined = cart.find(product => product['id'] === productId)
 
-            }
-          })
-        })
+        if (isProductInTheCart) {
+          updateProductAmount({ productId: productId, amount: isProductInTheCart.amount + 1 })
+        } else {
+          let productToAddCart = {
+            ...product,
+            amount: 1
+          }
+          setCart([...cart, productToAddCart])
+        }
+
+      } else {
+        throw 'That product does not exists'
+      }
 
     } catch {
       toast.error('Erro na adição do produto');
