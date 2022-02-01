@@ -2,6 +2,7 @@ import { createContext, ReactNode, useContext, useEffect, useState } from 'react
 import { toast } from 'react-toastify';
 import { api } from '../services/api';
 import { Product, Stock } from '../types';
+import { AxiosResponse, AxiosError } from 'axios'
 
 interface CartProviderProps {
   children: ReactNode;
@@ -32,72 +33,25 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     return [];
   });
 
-  const [products, setProducts] = useState<Product[]>([])
-  const [stock, setStock] = useState<Stock[]>([])
-
-  useEffect(() => {
-    let productsToAdd: Product[] = []
-    api.get('/products').then(response => {
-      response.data.forEach((product: Product) => {
-        productsToAdd.push(product)
-      })
-      setProducts(productsToAdd)
-    })
-  }, []);
-
-  useEffect(() => {
-    let stock: Stock[] = []
-    products.map(product => {
-      api.get('stock/' + product.id).then(response => {
-        const productStock: Stock = {
-          id: response.data.id,
-          amount: response.data.amount
-        }
-        stock.push(productStock)
-      })
-    })
-    setStock(stock)
-  }, [])
-
   useEffect(() => {
     localStorage.setItem("@RocketShoes:cart", JSON.stringify(cart))
   }, [cart]);
 
-  function verifyStock(productId: number, productAmount: number) {
-    return stock.map(stock => {
-      if (stock.id === productId) {
-        if (stock.amount < productAmount) {
-          return false
-        } else {
-          return true
-        }
-      }
-    })
-  }
-
   const addProduct = async (productId: number) => {
     try {
-      let product: Product | undefined = products.find(product => product['id'] === productId)
 
-      if (product) {
-        let isProductInTheCart: Product | undefined = cart.find(product => product['id'] === productId)
+      let isProductInTheCart: Product | undefined = cart.find(product => product['id'] === productId)
 
-        if (isProductInTheCart) {
-          if (verifyStock(productId, isProductInTheCart.amount)) {
-            updateProductAmount({ productId: productId, amount: isProductInTheCart.amount + 1 })
-          } else {
-            toast.error('Quantidade solicitada fora de estoque');
-          }
-        } else {
+      if (isProductInTheCart) {
+        updateProductAmount({ productId: productId, amount: isProductInTheCart.amount + 1 })
+      } else {
+        api.get('/products/' + productId).then(response => {
           let productToAddCart = {
-            ...product,
+            ...response.data,
             amount: 1
           }
           setCart([...cart, productToAddCart])
-        }
-
-      } else {
-        throw 'That product does not exists'
+        })
       }
 
     } catch {
